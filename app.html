@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDA Reform Movement Church App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4845B8',
+                        'primary-light': '#8480F0'
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
+    <!-- Loading Screen -->
+    <div id="loading" class="fixed inset-0 bg-primary flex items-center justify-center z-50">
+        <div class="text-center text-white">
+            <div class="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 class="text-2xl font-bold" data-i18n="loading.title">SDA Reform Movement</h2>
+            <p class="text-primary-light" data-i18n="loading.subtitle">Church Community App</p>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="hidden fixed inset-0 bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center z-40">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-church text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white" data-i18n="login.welcome">Welcome</h1>
+                <p class="text-gray-600 dark:text-gray-300" data-i18n="login.subtitle">SDA Reform Movement Church</p>
+            </div>
+            
+            <!-- Language Selector -->
+            <div class="mb-6">
+                <select id="languageSelector" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700">
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                    <option value="rm">Rumantsch</option>
+                </select>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="login.email">Email</label>
+                    <input type="email" id="email" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" data-i18n-placeholder="login.email_placeholder" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="login.password">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" data-i18n-placeholder="login.password_placeholder" required>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                    <span data-i18n="login.signin">Sign In</span>
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="login.demo_accounts">Demo Accounts:</p>
+                <div class="mt-2 space-y-1 text-xs">
+                    <p><strong data-i18n="login.admin">Admin:</strong> admin@church.org / admin123</p>
+                    <p><strong data-i18n="login.pastor">Pastor:</strong> pastor@church.org / pastor123</p>
+                    <p><strong data-i18n="login.member">Member:</strong> member@church.org / member123</p>
+                </div>
+                <button id="registerBtn" class="mt-4 text-primary hover:text-primary-dark text-sm" data-i18n="login.register">New Member? Register Here</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registrationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" data-i18n="register.title">Member Registration</h2>
+                <button id="closeRegisterModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="registerForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" data-i18n="register.first_name">First Name</label>
+                        <input type="text" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2" data-i18n="register.last_name">Last Name</label>
+                        <input type="text" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="register.email">Email</label>
+                    <input type="email" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="register.phone">Phone Number</label>
+                    <input type="tel" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2" data-i18n="register.password">Password</label>
+                    <input type="password" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" required>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="agreeTerms" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary" required>
+                    <label for="agreeTerms" class="ml-2 text-sm text-gray-600 dark:text-gray-400" data-i18n="register.agree_terms">I agree to the church guidelines and privacy policy</label>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                    <span data-i18n="register.submit">Request Membership</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-church text-white"></i>
+                        </div>
+                        <h1 class="ml-3 text-xl font-bold text-gray-900 dark:text-white" data-i18n="app.title">SDA Reform Church</h1>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Language Switcher -->
+                        <select id="headerLanguageSelector" class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 dark:bg-gray-700">
+                            <option value="en">EN</option>
+                            <option value="de">DE</option>
+                            <option value="rm">RM</option>
+                        </select>
+                        
+                        <!-- Notifications -->
+                        <button id="notificationBtn" class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-primary">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span id="notificationBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center notification-badge">5</span>
+                        </button>
+                        
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-2">
+                            <img id="userAvatar" class="w-8 h-8 rounded-full" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM1RDVDREUiLz4KPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTggMTJDMTAuMjA5MSAxMiAxMiAxMC4yMDkxIDEyIDhDMTIgNS43OTA5IDEwLjIwOTEgNCAxMiA0QzUuNzkwOSA0IDQgNS43OTA5IDQgOEM0IDEwLjIwOTEgNS43OTA5IDEyIDggMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+" alt="User">
+                            <span id="userName" class="text-sm font-medium hidden sm:block">John Doe</span>
+                            <button id="profileBtn" class="text-gray-600 dark:text-gray-300 hover:text-primary">
+                                <i class="fas fa-user-cog"></i>
+                            </button>
+                            <button id="logoutBtn" class="text-gray-600 dark:text-gray-300 hover:text-red-500">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-8 overflow-x-auto">
+                    <button class="nav-btn py-4 px-2 border-b-2 border-primary text-primary font-medium whitespace-nowrap" data-section="dashboard">
+                        <i class="fas fa-home mr-2"></i><span data-i18n="nav.dashboard">Dashboard</span>
+                    </button>
+                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap" data-section="sermons">
+                        <i class="fas fa-play mr-2"></i><span data-i18n="nav.sermons">Sermons</span>
+                    </button>
+                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap" data-section="events">
+                        <i class="fas fa-calendar mr-2"></i><span data-i18n="nav.events">Events</span>
+                    </button>
+                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap" data-section="news">
+                        <i class="fas fa-newspaper mr-2"></i><span data-i18n="nav.news">News</span>
+                    </button>
+                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap" data-section="community">
+                        <i class="fas fa-users mr-2"></i><span data-i18n="nav.community">Community</span>
+                    </button>
+                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap" data-section="donations">
+                        <i class="fas fa-heart mr-2"></i><span data-i18n="nav.donations">Giving</span>
+                    </button>
+                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap" data-section="prayers">
+                        <i class="fas fa-praying-hands mr-2"></i><span data-i18n="nav.prayers">Prayer</span>
+                    </button>
+                    <button id="adminNav" class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-600 dark:text-gray-300 hover:text-primary font-medium whitespace-nowrap hidden" data-section="admin">
+                        <i class="fas fa-cog mr-2"></i><span data-i18n="nav.admin">Admin</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section fade-in">
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 dark:text-blue-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="dashboard.members">Members</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">247</p>
+                                <p class="text-xs text-green-600">+12 this month</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-green-600 dark:text-green-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="dashboard.events">Events</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">8</p>
+                                <p class="text-xs text-blue-600">5 this week</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-praying-hands text-purple-600 dark:text-purple-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="dashboard.prayers">Prayers</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">15</p>
+                                <p class="text-xs text-purple-600">3 answered</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-heart text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="dashboard.donations">Donations</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">$9.2K</p>
+                                <p class="text-xs text-green-600">77% of goal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Dashboard Content -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Upcoming Events -->
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold" data-i18n="dashboard.upcoming_events">Upcoming Events</h3>
+                            <button class="text-primary hover:text-primary-dark text-sm" data-i18n="dashboard.view_all">View All</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-church text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium" data-i18n="dashboard.sabbath_service">Sabbath Service</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">December 21, 2024 • 10:00 AM</p>
+                                    <p class="text-xs text-green-600">156 attending</p>
+                                </div>
+                                <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-dark">RSVP</button>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium" data-i18n="dashboard.youth_study">Youth Bible Study</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">December 23, 2024 • 7:00 PM</p>
+                                    <p class="text-xs text-green-600">23 attending</p>
+                                </div>
+                                <button class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600">RSVP</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions & Notifications -->
+                    <div class="space-y-6">
+                        <!-- Quick Actions -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="dashboard.quick_actions">Quick Actions</h3>
+                            <div class="space-y-3">
+                                <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark flex items-center justify-center">
+                                    <i class="fas fa-praying-hands mr-2"></i><span data-i18n="dashboard.submit_prayer">Submit Prayer Request</span>
+                                </button>
+                                <button class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 flex items-center justify-center">
+                                    <i class="fas fa-heart mr-2"></i><span data-i18n="dashboard.donate">Make Donation</span>
+                                </button>
+                                <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 flex items-center justify-center">
+                                    <i class="fas fa-calendar-plus mr-2"></i><span data-i18n="dashboard.view_calendar">View Calendar</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="dashboard.recent_activity">Recent Activity</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <p class="text-sm">New sermon uploaded</p>
+                                    <span class="text-xs text-gray-500 ml-auto">2h ago</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <p class="text-sm">Event reminder sent</p>
+                                    <span class="text-xs text-gray-500 ml-auto">4h ago</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                    <p class="text-sm">Prayer request answered</p>
+                                    <span class="text-xs text-gray-500 ml-auto">1d ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enhanced Sermons Section -->
+            <section id="sermons" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="sermons.title">Sermons & Messages</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="sermons.subtitle">Listen to inspiring messages from our pastors</p>
+                </div>
+
+                <!-- Sermon Filters -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6 border border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <select class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700">
+                            <option data-i18n="sermons.filter_speaker">All Speakers</option>
+                            <option>Pastor Johnson</option>
+                            <option>Pastor Smith</option>
+                            <option>Guest Speaker</option>
+                        </select>
+                        <select class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700">
+                            <option data-i18n="sermons.filter_series">All Series</option>
+                            <option>Faith & Trials</option>
+                            <option>Sabbath Blessings</option>
+                            <option>Prayer Power</option>
+                        </select>
+                        <input type="search" placeholder="Search sermons..." class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 flex-1 min-w-0" data-i18n-placeholder="sermons.search_placeholder">
+                    </div>
+                </div>
+
+                <!-- Featured Sermon -->
+                <div class="bg-gradient-to-r from-primary to-primary-dark rounded-xl p-6 mb-6 text-white">
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="flex-1 mb-4 md:mb-0">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full mb-2 inline-block">Featured</span>
+                            <h3 class="text-xl font-bold mb-2">Faith in Times of Trial</h3>
+                            <p class="text-primary-light mb-2">Pastor Johnson • December 15, 2024 • 45 min</p>
+                            <p class="text-white opacity-90">Exploring how faith sustains us during life's most challenging moments and finding hope in God's promises.</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="bg-white text-primary px-6 py-3 rounded-lg font-medium hover:bg-gray-100 flex items-center">
+                                <i class="fas fa-play mr-2"></i>Play Now
+                            </button>
+                            <button class="bg-white bg-opacity-20 text-white px-4 py-3 rounded-lg hover:bg-opacity-30">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sermon Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Sermon cards would be generated here -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <div class="aspect-video bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center relative">
+                            <button class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </button>
+                            <span class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">38:42</span>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-semibold mb-2">The Power of Prayer</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Pastor Johnson • December 8, 2024</p>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">Understanding the transformative power of prayer in our daily lives and spiritual growth.</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-2">
+                                    <button class="bg-primary text-white py-2 px-4 rounded-lg text-sm hover:bg-primary-dark flex items-center">
+                                        <i class="fas fa-play mr-2"></i>Play
+                                    </button>
+                                    <button class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-3 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    <span>234</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- More sermon cards... -->
+                </div>
+            </section>
+
+            <!-- Enhanced Events Section -->
+            <section id="events" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="events.title">Church Events & Calendar</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="events.subtitle">Join us for upcoming church activities and fellowship</p>
+                </div>
+
+                <!-- Calendar View Toggle -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex space-x-2">
+                        <button id="listViewBtn" class="bg-primary text-white px-4 py-2 rounded-lg text-sm">List View</button>
+                        <button id="calendarViewBtn" class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm">Calendar View</button>
+                    </div>
+                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center" data-admin-only>
+                        <i class="fas fa-plus mr-2"></i><span data-i18n="events.add_event">Add Event</span>
+                    </button>
+                </div>
+
+                <!-- Next Sabbath Service -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 mb-6 text-white">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2" data-i18n="events.next_sabbath">Next Sabbath Service</h3>
+                            <p class="text-blue-100 mb-1">December 21, 2024 • 10:00 AM - 12:00 PM</p>
+                            <p class="text-blue-200 text-sm">Church Sanctuary • Expected: 200+ attendees</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 flex space-x-3">
+                            <button class="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100">
+                                RSVP Now
+                            </button>
+                            <button class="bg-white bg-opacity-20 text-white px-4 py-3 rounded-lg hover:bg-opacity-30">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Categories -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <button class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary text-center">
+                        <i class="fas fa-church text-2xl text-primary mb-2"></i>
+                        <p class="text-sm font-medium" data-i18n="events.worship">Worship</p>
+                    </button>
+                    <button class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary text-center">
+                        <i class="fas fa-users text-2xl text-green-500 mb-2"></i>
+                        <p class="text-sm font-medium" data-i18n="events.fellowship">Fellowship</p>
+                    </button>
+                    <button class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary text-center">
+                        <i class="fas fa-graduation-cap text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-sm font-medium" data-i18n="events.education">Education</p>
+                    </button>
+                    <button class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary text-center">
+                        <i class="fas fa-hands-helping text-2xl text-purple-500 mb-2"></i>
+                        <p class="text-sm font-medium" data-i18n="events.outreach">Outreach</p>
+                    </button>
+                </div>
+
+                <!-- Events List -->
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-green-600 dark:text-green-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold mb-1">Youth Bible Study</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">December 23, 2024 • 7:00 PM - 8:30 PM</p>
+                                    <p class="text-gray-700 dark:text-gray-300 text-sm">Special session for young adults focusing on contemporary Christian living and faith challenges.</p>
+                                    <div class="flex items-center mt-3 space-x-4">
+                                        <span class="text-xs text-green-600 bg-green-100 dark:bg-green-900 px-2 py-1 rounded-full">23 attending</span>
+                                        <span class="text-xs text-gray-500">Led by Pastor Smith</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-dark">
+                                Register
+                            </button>
+                        </div>
+                    </div>
+                    <!-- More events... -->
+                </div>
+            </section>
+
+            <!-- Enhanced Community Section -->
+            <section id="community" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="community.title">Church Community</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="community.subtitle">Connect with fellow members and stay engaged</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Member Directory -->
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold" data-i18n="community.directory">Member Directory</h3>
+                            <input type="search" placeholder="Search members..." class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-sm" data-i18n-placeholder="community.search_members">
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <img class="w-12 h-12 rounded-full" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iMjQiIGZpbGw9IiM1RDVDREUiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSIxMiIgeT0iMTIiPgo8cGF0aCBkPSJNMTIgMThDMTUuMzEzNyAxOCAxOCAxNS4zMTM3IDE4IDEyQzE4IDguNjg2MjkgMTUuMzEzNyA2IDEyIDZDOC42ODYyOSA2IDYgOC42ODYyOSA2IDEyQzYgMTUuMzEzNyA4LjY4NjI5IDE4IDEyIDE4WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPg==" alt="Member">
+                                <div class="flex-1">
+                                    <h4 class="font-medium">Sarah Martinez</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Youth Ministry Leader</p>
+                                    <p class="text-xs text-gray-500">Member since 2019</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-primary hover:text-primary-dark">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                    <button class="text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- More members... -->
+                        </div>
+                    </div>
+
+                    <!-- Community Stats & Activities -->
+                    <div class="space-y-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="community.stats">Community Stats</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="community.active_members">Active Members</span>
+                                    <span class="font-semibold">247</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="community.new_this_month">New This Month</span>
+                                    <span class="font-semibold text-green-600">12</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="community.birthdays">Birthdays This Week</span>
+                                    <span class="font-semibold text-blue-600">3</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="community.prayer_warriors">Prayer Warriors</span>
+                                    <span class="font-semibold text-purple-600">45</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="community.ministries">Ministry Groups</h3>
+                            <div class="space-y-3">
+                                <button class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Youth Ministry</span>
+                                        <span class="text-sm text-gray-500">23 members</span>
+                                    </div>
+                                </button>
+                                <button class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Music Ministry</span>
+                                        <span class="text-sm text-gray-500">18 members</span>
+                                    </div>
+                                </button>
+                                <button class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Outreach Team</span>
+                                        <span class="text-sm text-gray-500">32 members</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- News Section (Enhanced) -->
+            <section id="news" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="news.title">Church News & Announcements</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="news.subtitle">Stay updated with the latest church news and announcements</p>
+                </div>
+
+                <!-- News Categories -->
+                <div class="flex space-x-4 mb-6 overflow-x-auto">
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap">All News</button>
+                    <button class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm whitespace-nowrap">Announcements</button>
+                    <button class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm whitespace-nowrap">Events</button>
+                    <button class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm whitespace-nowrap">Ministry Updates</button>
+                </div>
+
+                <!-- Featured News -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 mb-6 text-white">
+                    <span class="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full mb-2 inline-block">Featured</span>
+                    <h3 class="text-xl font-bold mb-2">New Year Prayer Week Announcement</h3>
+                    <p class="text-green-100 mb-4">Join us for our annual New Year Prayer Week starting January 1st, 2025. Special prayer sessions every evening from 7:00-8:30 PM as we seek God's guidance for the coming year.</p>
+                    <button class="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100">
+                        Read More
+                    </button>
+                </div>
+
+                <!-- News List -->
+                <div class="space-y-6">
+                    <!-- News articles would be generated here -->
+                </div>
+            </section>
+
+            <!-- Enhanced Donations Section -->
+            <section id="donations" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="donations.title">Support Our Ministry</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="donations.subtitle">Your generous donations help us continue God's work in our community</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Donation Form -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4" data-i18n="donations.make_donation">Make a Donation</h3>
+                        
+                        <!-- Donation Type -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2" data-i18n="donations.type">Donation Type</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="donation-type bg-primary text-white py-2 rounded-lg text-sm" data-type="one-time">One-time</button>
+                                <button class="donation-type bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm" data-type="monthly">Monthly</button>
+                            </div>
+                        </div>
+
+                        <!-- Amount Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2" data-i18n="donations.amount">Amount</label>
+                            <div class="grid grid-cols-3 gap-3 mb-3">
+                                <button class="donation-amount bg-gray-100 dark:bg-gray-700 py-3 rounded-lg font-medium hover:bg-primary hover:text-white" data-amount="25">$25</button>
+                                <button class="donation-amount bg-gray-100 dark:bg-gray-700 py-3 rounded-lg font-medium hover:bg-primary hover:text-white" data-amount="50">$50</button>
+                                <button class="donation-amount bg-gray-100 dark:bg-gray-700 py-3 rounded-lg font-medium hover:bg-primary hover:text-white" data-amount="100">$100</button>
+                            </div>
+                            <input type="number" id="customAmount" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" data-i18n-placeholder="donations.custom_amount">
+                        </div>
+
+                        <!-- Purpose Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2" data-i18n="donations.purpose">Donation Purpose</label>
+                            <select class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700">
+                                <option data-i18n="donations.general_fund">General Fund</option>
+                                <option data-i18n="donations.building_fund">Building Fund</option>
+                                <option data-i18n="donations.missionary_support">Missionary Support</option>
+                                <option data-i18n="donations.youth_ministry">Youth Ministry</option>
+                                <option data-i18n="donations.community_outreach">Community Outreach</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2" data-i18n="donations.payment_method">Payment Method</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button class="payment-method bg-primary text-white py-2 rounded-lg text-sm flex items-center justify-center" data-method="card">
+                                    <i class="fas fa-credit-card mr-1"></i>Card
+                                </button>
+                                <button class="payment-method bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm flex items-center justify-center" data-method="bank">
+                                    <i class="fas fa-university mr-1"></i>Bank
+                                </button>
+                                <button class="payment-method bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm flex items-center justify-center" data-method="paypal">
+                                    <i class="fab fa-paypal mr-1"></i>PayPal
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark">
+                            <i class="fas fa-heart mr-2"></i><span data-i18n="donations.donate_now">Donate Now</span>
+                        </button>
+                    </div>
+
+                    <!-- Donation Progress & Impact -->
+                    <div class="space-y-6">
+                        <!-- Monthly Goal -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="donations.monthly_goal">December Goal</h3>
+                            <div class="relative mb-4">
+                                <svg class="w-32 h-32 mx-auto" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" r="50" stroke="#e5e7eb" stroke-width="8" fill="transparent"/>
+                                    <circle cx="60" cy="60" r="50" stroke="#5D5CDE" stroke-width="8" fill="transparent" 
+                                            stroke-dasharray="314" stroke-dashoffset="94" class="progress-ring"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-primary">77%</p>
+                                        <p class="text-xs text-gray-500">Complete</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold">$9,240</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">of $12,000 goal</p>
+                                <p class="text-xs text-green-600 mt-1">$760 needed</p>
+                            </div>
+                        </div>
+
+                        <!-- Recent Donations -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="donations.recent">Recent Donations</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">Anonymous</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">General Fund</p>
+                                    </div>
+                                    <span class="font-semibold text-green-600">$100</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">John D.</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Youth Ministry</p>
+                                    </div>
+                                    <span class="font-semibold text-green-600">$50</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">Sarah M.</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Building Fund</p>
+                                    </div>
+                                    <span class="font-semibold text-green-600">$75</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fund Allocation -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="donations.allocation">Fund Allocation</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="donations.ministry_operations">Ministry Operations</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                            <div class="w-2/5 h-full bg-primary rounded-full"></div>
+                                        </div>
+                                        <span class="text-sm font-medium">40%</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="donations.community_outreach">Community Outreach</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                            <div class="w-1/4 h-full bg-green-500 rounded-full"></div>
+                                        </div>
+                                        <span class="text-sm font-medium">25%</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="donations.building_maintenance">Building Maintenance</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                            <div class="w-1/5 h-full bg-blue-500 rounded-full"></div>
+                                        </div>
+                                        <span class="text-sm font-medium">20%</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm" data-i18n="donations.youth_programs">Youth Programs</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                            <div class="w-3/20 h-full bg-purple-500 rounded-full"></div>
+                                        </div>
+                                        <span class="text-sm font-medium">15%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enhanced Prayer Requests Section -->
+            <section id="prayers" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="prayers.title">Prayer Requests & Ministry</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="prayers.subtitle">Share your prayer needs with our church family</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Submit Prayer Request -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4" data-i18n="prayers.submit">Submit Prayer Request</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2" data-i18n="prayers.your_name">Your Name (Optional)</label>
+                                <input type="text" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" data-i18n-placeholder="prayers.name_placeholder">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2" data-i18n="prayers.category">Prayer Category</label>
+                                <select class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700">
+                                    <option data-i18n="prayers.cat_healing">Healing & Health</option>
+                                    <option data-i18n="prayers.cat_guidance">Guidance & Wisdom</option>
+                                    <option data-i18n="prayers.cat_family">Family & Relationships</option>
+                                    <option data-i18n="prayers.cat_financial">Financial Provision</option>
+                                    <option data-i18n="prayers.cat_spiritual">Spiritual Growth</option>
+                                    <option data-i18n="prayers.cat_thanksgiving">Thanksgiving</option>
+                                    <option data-i18n="prayers.cat_other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2" data-i18n="prayers.request">Prayer Request</label>
+                                <textarea rows="5" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:bg-gray-700" data-i18n-placeholder="prayers.request_placeholder"></textarea>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="anonymous" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="anonymous" class="ml-2 text-sm text-gray-600 dark:text-gray-400" data-i18n="prayers.anonymous">Submit anonymously</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="urgent" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="urgent" class="ml-2 text-sm text-gray-600 dark:text-gray-400" data-i18n="prayers.urgent">Mark as urgent</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                <i class="fas fa-praying-hands mr-2"></i><span data-i18n="prayers.submit_btn">Submit Prayer Request</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Prayer Requests List -->
+                    <div class="space-y-6">
+                        <!-- Prayer Statistics -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="prayers.stats">Prayer Ministry Stats</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-primary">45</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="prayers.stat_warriors">Prayer Warriors</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-green-600">23</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="prayers.stat_answered">Answered Prayers</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-blue-600">15</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="prayers.stat_active">Active Requests</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-purple-600">156</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="prayers.stat_total">Total This Month</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Prayer Requests -->
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold mb-4" data-i18n="prayers.recent">Recent Prayer Requests</h3>
+                            <div class="space-y-4">
+                                <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-user-circle text-gray-400"></i>
+                                            <span class="text-sm font-medium">Sarah M.</span>
+                                            <span class="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded-full">Urgent</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">2 days ago</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">Please pray for my mother's recovery from surgery. The doctors say she's doing well, but we would appreciate continued prayers for her healing.</p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-purple-600 bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded-full">Healing & Health</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-primary">🙏 15 praying</span>
+                                            <button class="text-xs text-primary hover:text-primary-dark">Join Prayer</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-user-circle text-gray-400"></i>
+                                            <span class="text-sm font-medium">Anonymous</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">5 days ago</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">Seeking guidance and wisdom for an important life decision. Please pray for God's direction in my path.</p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-blue-600 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">Guidance & Wisdom</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-primary">🙏 8 praying</span>
+                                            <button class="text-xs text-primary hover:text-primary-dark">Join Prayer</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-user-circle text-gray-400"></i>
+                                            <span class="text-sm font-medium">John D.</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">1 week ago</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">Grateful for answered prayers! My job situation has been resolved. Thank you to everyone who prayed for me.</p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-green-600 bg-green-100 dark:bg-green-900 px-2 py-1 rounded-full">✓ Answered Prayer</span>
+                                        <span class="text-xs text-green-600">Praise God!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enhanced Admin Section -->
+            <section id="admin" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2" data-i18n="admin.title">Admin Dashboard</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-i18n="admin.subtitle">Manage church content, members, and settings</p>
+                </div>
+
+                <!-- Admin Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 dark:text-blue-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="admin.total_members">Total Members</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">247</p>
+                                <p class="text-xs text-green-600">+12 this month</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-plus text-green-600 dark:text-green-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="admin.active_events">Active Events</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">8</p>
+                                <p class="text-xs text-blue-600">5 this week</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-praying-hands text-purple-600 dark:text-purple-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="admin.prayer_requests">Prayer Requests</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">15</p>
+                                <p class="text-xs text-purple-600">3 urgent</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-heart text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400" data-i18n="admin.monthly_donations">Monthly Donations</p>
+                                <p class="text-2xl font-bold text-gray-900 dark:text-white">$9.2K</p>
+                                <p class="text-xs text-green-600">77% of goal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Actions Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Content Management -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4" data-i18n="admin.content_management">Content Management</h3>
+                        <div class="space-y-3">
+                            <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i><span data-i18n="admin.add_event">Add New Event</span>
+                            </button>
+                            <button class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 flex items-center justify-center">
+                                <i class="fas fa-bullhorn mr-2"></i><span data-i18n="admin.send_announcement">Send Announcement</span>
+                            </button>
+                            <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 flex items-center justify-center">
+                                <i class="fas fa-upload mr-2"></i><span data-i18n="admin.upload_sermon">Upload Sermon</span>
+                            </button>
+                            <button class="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 flex items-center justify-center">
+                                <i class="fas fa-newspaper mr-2"></i><span data-i18n="admin.create_news">Create News Article</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- User & Role Management -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4" data-i18n="admin.user_management">User & Role Management</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div>
+                                    <p class="font-medium" data-i18n="admin.role_admin">Admin</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="admin.role_admin_desc">Full access to all features</p>
+                                </div>
+                                <span class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs px-2 py-1 rounded-full">3 users</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div>
+                                    <p class="font-medium" data-i18n="admin.role_pastor">Pastor</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="admin.role_pastor_desc">Can manage sermons and events</p>
+                                </div>
+                                <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full">2 users</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div>
+                                    <p class="font-medium" data-i18n="admin.role_member">Member</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" data-i18n="admin.role_member_desc">Basic access to content</p>
+                                </div>
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded-full">242 users</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
+                                <i class="fas fa-cog mr-2"></i><span data-i18n="admin.manage_roles">Manage Roles</span>
+                            </button>
+                            <button class="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
+                                <i class="fas fa-user-plus mr-2"></i><span data-i18n="admin.add_member">Add Member</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Analytics & Reports -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-semibold mb-4" data-i18n="admin.analytics">Analytics & Reports</h3>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium" data-i18n="admin.engagement">Member Engagement</span>
+                                    <span class="text-sm font-bold text-green-600">78%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium" data-i18n="admin.event_attendance">Event Attendance</span>
+                                    <span class="text-sm font-bold text-blue-600">85%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium" data-i18n="admin.donation_goal">Donation Goal</span>
+                                    <span class="text-sm font-bold text-purple-600">77%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div class="bg-purple-500 h-2 rounded-full" style="width: 77%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
+                                <i class="fas fa-chart-bar mr-2"></i><span data-i18n="admin.view_reports">View Full Reports</span>
+                            </button>
+                            <button class="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
+                                <i class="fas fa-download mr-2"></i><span data-i18n="admin.export_data">Export Data</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notifications Panel -->
+    <div id="notificationsPanel" class="fixed top-16 right-4 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-30 hidden slide-in">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center">
+                <h3 class="font-semibold" data-i18n="notifications.title">Notifications</h3>
+                <button id="markAllRead" class="text-sm text-primary hover:text-primary-dark" data-i18n="notifications.mark_all_read">Mark All Read</button>
+            </div>
+        </div>
+        <div class="p-4 space-y-4 max-h-96 overflow-y-auto">
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium" data-i18n="notifications.sermon_uploaded">New sermon uploaded</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Faith in Times of Trial - 2 hours ago</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium" data-i18n="notifications.event_reminder">Event reminder</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Youth Bible Study tomorrow at 7 PM</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium" data-i18n="notifications.prayer_request">New prayer request</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Sarah M. requested prayers - 5 hours ago</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium" data-i18n="notifications.donation_received">New donation received</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">$100 for Building Fund - 1 day ago</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium" data-i18n="notifications.urgent_prayer">Urgent prayer request</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Member needs immediate prayer support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            en: {
+                "loading.title": "SDA Reform Movement",
+                "loading.subtitle": "Church Community App",
+                "login.welcome": "Welcome",
+                "login.subtitle": "SDA Reform Movement Church",
+                "login.email": "Email",
+                "login.email_placeholder": "your.email@example.com",
+                "login.password": "Password",
+                "login.password_placeholder": "Password",
+                "login.signin": "Sign In",
+                "login.demo_accounts": "Demo Accounts:",
+                "login.admin": "Admin",
+                "login.pastor": "Pastor",
+                "login.member": "Member",
+                "login.register": "New Member? Register Here",
+                "register.title": "Member Registration",
+                "register.first_name": "First Name",
+                "register.last_name": "Last Name",
+                "register.email": "Email",
+                "register.phone": "Phone Number",
+                "register.password": "Password",
+                "register.agree_terms": "I agree to the church guidelines and privacy policy",
+                "register.submit": "Request Membership",
+                "app.title": "SDA Reform Church",
+                "nav.dashboard": "Dashboard",
+                "nav.sermons": "Sermons",
+                "nav.events": "Events",
+                "nav.news": "News",
+                "nav.community": "Community",
+                "nav.donations": "Giving",
+                "nav.prayers": "Prayer",
+                "nav.admin": "Admin",
+                "dashboard.members": "Members",
+                "dashboard.events": "Events",
+                "dashboard.prayers": "Prayers",
+                "dashboard.donations": "Donations",
+                "dashboard.upcoming_events": "Upcoming Events",
+                "dashboard.view_all": "View All",
+                "dashboard.sabbath_service": "Sabbath Service",
+                "dashboard.youth_study": "Youth Bible Study",
+                "dashboard.quick_actions": "Quick Actions",
+                "dashboard.submit_prayer": "Submit Prayer Request",
+                "dashboard.donate": "Make Donation",
+                "dashboard.view_calendar": "View Calendar",
+                "dashboard.recent_activity": "Recent Activity"
+            },
+            de: {
+                "loading.title": "STA Reform Bewegung",
+                "loading.subtitle": "Gemeinde Community App",
+                "login.welcome": "Willkommen",
+                "login.subtitle": "STA Reform Bewegung Gemeinde",
+                "login.email": "E-Mail",
+                "login.email_placeholder": "ihre.email@beispiel.de",
+                "login.password": "Passwort",
+                "login.password_placeholder": "Passwort",
+                "login.signin": "Anmelden",
+                "login.demo_accounts": "Demo-Konten:",
+                "login.admin": "Admin",
+                "login.pastor": "Pastor",
+                "login.member": "Mitglied",
+                "login.register": "Neues Mitglied? Hier registrieren",
+                "register.title": "Mitglieder-Registrierung",
+                "register.first_name": "Vorname",
+                "register.last_name": "Nachname",
+                "register.email": "E-Mail",
+                "register.phone": "Telefonnummer",
+                "register.password": "Passwort",
+                "register.agree_terms": "Ich stimme den Gemeinde-Richtlinien und der Datenschutzrichtlinie zu",
+                "register.submit": "Mitgliedschaft beantragen",
+                "app.title": "STA Reform Gemeinde",
+                "nav.dashboard": "Dashboard",
+                "nav.sermons": "Predigten",
+                "nav.events": "Veranstaltungen",
+                "nav.news": "Nachrichten",
+                "nav.community": "Gemeinschaft",
+                "nav.donations": "Spenden",
+                "nav.prayers": "Gebet",
+                "nav.admin": "Admin",
+                "dashboard.members": "Mitglieder",
+                "dashboard.events": "Veranstaltungen",
+                "dashboard.prayers": "Gebete",
+                "dashboard.donations": "Spenden",
+                "dashboard.upcoming_events": "Bevorstehende Veranstaltungen",
+                "dashboard.view_all": "Alle anzeigen",
+                "dashboard.sabbath_service": "Sabbat-Gottesdienst",
+                "dashboard.youth_study": "Jugend-Bibelstunde",
+                "dashboard.quick_actions": "Schnellaktionen",
+                "dashboard.submit_prayer": "Gebetsanliegen einreichen",
+                "dashboard.donate": "Spenden",
+                "dashboard.view_calendar": "Kalender anzeigen",
+                "dashboard.recent_activity": "Letzte Aktivitäten"
+            },
+            rm: {
+                "loading.title": "Moviment da Refurma STA",
+                "loading.subtitle": "App da Cuminanza Baselgia",
+                "login.welcome": "Bainvegni",
+                "login.subtitle": "Baselgia Moviment da Refurma STA",
+                "login.email": "E-Mail",
+                "login.email_placeholder": "vossa.email@exempel.ch",
+                "login.password": "Pled-clav",
+                "login.password_placeholder": "Pled-clav",
+                "login.signin": "S'annunziar",
+                "login.demo_accounts": "Contos da demo:",
+                "login.admin": "Admin",
+                "login.pastor": "Pastor",
+                "login.member": "Commember",
+                "login.register": "Nov commember? Sa registrar qua",
+                "register.title": "Registraziun da commembers",
+                "register.first_name": "Prenum",
+                "register.last_name": "Sunum",
+                "register.email": "E-Mail",
+                "register.phone": "Numer da telefon",
+                "register.password": "Pled-clav",
+                "register.agree_terms": "Jau acceptel las directivas da baselgia e la protecziun da datas",
+                "register.submit": "Dumandar commembranza",
+                "app.title": "Baselgia Refurma STA",
+                "nav.dashboard": "Survista",
+                "nav.sermons": "Predichas",
+                "nav.events": "Occurrenzas",
+                "nav.news": "Novitads",
+                "nav.community": "Cuminanza",
+                "nav.donations": "Donaziuns",
+                "nav.prayers": "Uraziun",
+                "nav.admin": "Admin",
+                "dashboard.members": "Commembers",
+                "dashboard.events": "Occurrenzas",
+                "dashboard.prayers": "Uraziuns",
+                "dashboard.donations": "Donaziuns",
+                "dashboard.upcoming_events": "Proximas occurrenzas",
+                "dashboard.view_all": "Mussar tuts",
+                "dashboard.sabbath_service": "Servetsch dal sabbat",
+                "dashboard.youth_study": "Studi biblical per giuvens",
+                "dashboard.quick_actions": "Acziuns sveutas",
+                "dashboard.submit_prayer": "Trametter dumonda d'uraziun",
+                "dashboard.donate": "Far donaziun",
+                "dashboard.view_calendar": "Mussar chalender",
+                "dashboard.recent_activity": "Ultima activitad"
+            }
+        };
+
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // App state
+        let currentUser = null;
+        let currentSection = 'dashboard';
+        let currentLanguage = 'en'; // Default to English, no persistence in sandbox
+
+        // Mock user data
+        const users = {
+            'admin@church.org': { role: 'admin', name: 'Admin User', password: 'admin123' },
+            'pastor@church.org': { role: 'pastor', name: 'Pastor Johnson', password: 'pastor123' },
+            'member@church.org': { role: 'member', name: 'John Doe', password: 'member123' }
+        };
+
+        // Language functions
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            // Removed localStorage usage due to sandbox restrictions
+            updateAllTexts();
+            
+            // Update language selectors
+            document.getElementById('languageSelector').value = lang;
+            document.getElementById('headerLanguageSelector').value = lang;
+        }
+
+        function updateAllTexts() {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+
+            const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.placeholder = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loading');
+        const loginScreen = document.getElementById('loginScreen');
+        const registrationModal = document.getElementById('registrationModal');
+        const mainApp = document.getElementById('mainApp');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const userName = document.getElementById('userName');
+        const adminNav = document.getElementById('adminNav');
+
+        // Initialize app
+        function init() {
+            setLanguage(currentLanguage);
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+            }, 2000);
+
+            // Language selector listeners
+            document.getElementById('languageSelector').addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+            
+            document.getElementById('headerLanguageSelector').addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+
+            // Registration modal listeners
+            document.getElementById('registerBtn').addEventListener('click', () => {
+                registrationModal.classList.remove('hidden');
+            });
+
+            document.getElementById('closeRegisterModal').addEventListener('click', () => {
+                registrationModal.classList.add('hidden');
+            });
+
+            // Handle registration form
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Registration request submitted! An admin will review your application.');
+                registrationModal.classList.add('hidden');
+            });
+        }
+
+        // Handle login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (users[email] && users[email].password === password) {
+                currentUser = { email, ...users[email] };
+                userName.textContent = currentUser.name;
+                
+                if (currentUser.role === 'admin') {
+                    adminNav.classList.remove('hidden');
+                    // Show admin-only features
+                    document.querySelectorAll('[data-admin-only]').forEach(el => {
+                        el.classList.remove('hidden');
+                    });
+                }
+
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                showSection('dashboard');
+            } else {
+                alert('Invalid credentials. Please use the demo accounts provided.');
+            }
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            mainApp.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            adminNav.classList.add('hidden');
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            
+            // Hide admin-only features
+            document.querySelectorAll('[data-admin-only]').forEach(el => {
+                el.classList.add('hidden');
+            });
+        });
+
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const section = btn.dataset.section;
+                showSection(section);
+                
+                // Update nav buttons
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.remove('border-primary', 'text-primary');
+                    b.classList.add('border-transparent', 'text-gray-600', 'dark:text-gray-300');
+                });
+                btn.classList.add('border-primary', 'text-primary');
+                btn.classList.remove('border-transparent', 'text-gray-600', 'dark:text-gray-300');
+            });
+        });
+
+        // Show section
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionName).classList.remove('hidden');
+            document.getElementById(sectionName).classList.add('fade-in');
+            currentSection = sectionName;
+        }
+
+        // Notifications
+        notificationBtn.addEventListener('click', () => {
+            notificationsPanel.classList.toggle('hidden');
+        });
+
+        // Close notifications when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!notificationBtn.contains(e.target) && !notificationsPanel.contains(e.target)) {
+                notificationsPanel.classList.add('hidden');
+            }
+        });
+
+        // Mark all notifications as read
+        document.getElementById('markAllRead').addEventListener('click', () => {
+            document.getElementById('notificationBadge').style.display = 'none';
+            document.querySelectorAll('#notificationsPanel .w-2.h-2').forEach(dot => {
+                dot.classList.remove('bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500', 'bg-red-500');
+                dot.classList.add('bg-gray-300');
+            });
+        });
+
+        // Donation amount buttons
+        document.querySelectorAll('.donation-amount').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('customAmount').value = btn.dataset.amount;
+                document.querySelectorAll('.donation-amount').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('bg-gray-100', 'dark:bg-gray-700');
+                });
+                btn.classList.add('bg-primary', 'text-white');
+                btn.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+            });
+        });
+
+        // Donation type buttons
+        document.querySelectorAll('.donation-type').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.donation-type').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+                });
+                btn.classList.add('bg-primary', 'text-white');
+                btn.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            });
+        });
+
+        // Payment method buttons
+        document.querySelectorAll('.payment-method').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+                });
+                btn.classList.add('bg-primary', 'text-white');
+                btn.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            });
+        });
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
